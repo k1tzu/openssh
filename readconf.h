@@ -87,6 +87,7 @@ typedef struct {
 	char   *user_hostfiles[SSH_MAX_HOSTS_FILES];
 	char   *preferred_authentications;
 	char   *bind_address;	/* local socket address for connection to sshd */
+	char   *bind_interface;	/* local interface for connection to sshd */
 	char   *pkcs11_provider; /* PKCS#11 provider */
 	int	verify_host_key_dns;	/* Verify host key using DNS */
 

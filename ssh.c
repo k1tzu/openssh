@@ -72,6 +72,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#ifndef IFNAMSIZ
+#include <net/if.h>
+#define IFNAMSIZ IF_NAMESIZE
+#endif
+
 #ifdef WITH_OPENSSL
 #include <openssl/evp.h>
 #include <openssl/err.h>
@@ -197,7 +202,7 @@ static void
 usage(void)
 {
 	fprintf(stderr,
-"usage: ssh [-1246AaCfGgKkMNnqsTtVvXxYy] [-b bind_address] [-c cipher_spec]\n"
+"usage: ssh [-1246AaCfGgKkMNnqsTtVvXxYy] [-b bind_address] [-B bind_interface] [-c cipher_spec]\n"
 "           [-D [bind_address:]port] [-E log_file] [-e escape_char]\n"
 "           [-F configfile] [-I pkcs11] [-i identity_file]\n"
 "           [-J [user@]host[:port]] [-L address] [-l login_name] [-m mac_spec]\n"
@@ -608,7 +613,7 @@ main(int ac, char **av)
 	argv0 = av[0];
 
  again:
-	while ((opt = getopt(ac, av, "1246ab:c:e:fgi:kl:m:no:p:qstvx"
+	while ((opt = getopt(ac, av, "1246ab:B:c:e:fgi:kl:m:no:p:qstvx"
 	    "ACD:E:F:GI:J:KL:MNO:PQ:R:S:TVw:W:XYy")) != -1) {
 		switch (opt) {
 		case '1':
@@ -928,6 +933,15 @@ main(int ac, char **av)
 			break;
 		case 'b':
 			options.bind_address = optarg;
+			break;
+		case 'B':
+                        if(strlen(optarg) > IFNAMSIZ){
+				fprintf(stderr,
+				    "Wrong interface "
+				    "'%s'\n", optarg);
+				exit(255);
+                        }
+			options.bind_interface = optarg;
 			break;
 		case 'F':
 			config = optarg;

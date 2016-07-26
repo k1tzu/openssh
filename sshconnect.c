@@ -15,6 +15,11 @@
 
 #include "includes.h"
 
+#ifndef IFNAMSIZ
+#include <net/if.h>
+#define IFNAMSIZ IF_NAMESIZE
+#endif
+
 #include <sys/param.h>	/* roundup */
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -326,6 +331,16 @@ ssh_create_socket(int privileged, struct addrinfo *ai)
 	}
 	if (res != NULL)
 		freeaddrinfo(res);
+
+    if (options.bind_interface != NULL) {
+        if (setsockopt(sock,
+                SOL_SOCKET, SO_BINDTODEVICE,
+                options.bind_interface, strnlen(options.bind_interface, IFNAMSIZ)) < 0) {
+            error("socket SO_BINDTODEVICE: %s", strerror(errno));
+            return -1;
+        }
+    }
+
 	return sock;
 }
 
